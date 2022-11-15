@@ -14,7 +14,7 @@ var pplVerticalVel = 3;
 var pplHorizontalVel;
 var bugsVerticalVel = 3;
 var bugsHoizontalVel;
-var left, right;
+var left, right, up, down, leftUp, leftDown, rightUp, rightDown;
 var horizontalMov = 0;
 var verticalMov = 0;
 var inverter= -1;
@@ -34,6 +34,12 @@ function load() {
     // buttons
     left = document.getElementById("left");
     right = document.getElementById("right");
+    up = document.getElementById("up");
+    down = document.getElementById("down");
+    leftUp = document.getElementById("left-up");
+    leftDown = document.getElementById("left-down");
+    rightUp = document.getElementById("right-up");
+    rightDown = document.getElementById("right-down");
     // ppl
     for (var i = 0; i < num_ppl; i++) {
         ppl[i] = new Person();
@@ -107,8 +113,24 @@ Player.prototype.update = function () {
     left.addEventListener("touchstart", function () {
         horizontalMov = -1.5;
     });
+    leftUp.addEventListener("touchstart", function () {
+        horizontalMov = -1;
+        verticalMov = -1;
+    });
+    leftDown.addEventListener("touchstart", function () {
+        horizontalMov = -1;
+        verticalMov = 1;
+    });
     right.addEventListener("touchstart", function () {
         horizontalMov = 1.5;
+    });
+    rightUp.addEventListener("touchstart", function () {
+        horizontalMov = 1;
+        verticalMov = -1;
+    });
+    rightDown.addEventListener("touchstart", function () {
+        horizontalMov = 1;
+        verticalMov = 1;
     });
     up.addEventListener("touchstart", function () {
         verticalMov = -1.5;
@@ -120,8 +142,24 @@ Player.prototype.update = function () {
     left.addEventListener("touchend", function () {
         horizontalMov = 0;
     });
+    leftUp.addEventListener("touchend", function () {
+        horizontalMov = 0;
+        verticalMov = 0;
+    });
+    leftDown.addEventListener("touchend", function () {
+        horizontalMov = 0;
+        verticalMov = 0;
+    });
     right.addEventListener("touchend", function () {
         horizontalMov = 0;
+    });
+    rightUp.addEventListener("touchend", function () {
+        horizontalMov = 0;
+        verticalMov = 0;
+    });
+    rightDown.addEventListener("touchend", function () {
+        horizontalMov = 0;
+        verticalMov = 0;
     });
     up.addEventListener("touchend", function () {
         verticalMov = 0;
@@ -167,7 +205,7 @@ Person.prototype.update = function () {
     // ppl death
     if ((this.x - player[0].x < 60 && this.x - player[0].x > -60) && (this.y - player[0].y < 190 && this.y - player[0].y > -40)) {
         // crash color
-        ctx.fillStyle = '#ff0022';
+        ctx.fillStyle = '#db0f2e';
         ctx.fillRect(this.x - 30, this.y - 30, 60, 95);
         // count + 1
         if (this.status == 'alive') {
@@ -284,7 +322,7 @@ Bug.prototype.update = function () {
     // bug death
     if ((this.x - player[0].x < 60 && this.x - player[0].x > -60) && (this.y - player[0].y < 190 && this.y - player[0].y > -40)) {
         // crash color
-        ctx.fillStyle = '#eeee00';
+        ctx.fillStyle = '#52eb0c';
         ctx.fillRect(this.x - 30, this.y - 30, 60, 95);
         // count + 1
         if (this.status == 'alive') {
@@ -365,7 +403,7 @@ Bug.prototype.print = function(genre) {
 function loop() {
     // buckground
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#CCCCDD';
+    ctx.fillStyle = '#dbe08d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // people update
     for (var i = 0; i < num_ppl; i++) {

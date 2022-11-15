@@ -28,12 +28,12 @@ body {
   justify-content: center;
 }
 
-#btn-one, #btn-two, #btn-three, #btn-four {
+.btn {
   background-color: #444477;
   color: #486a9e;
   border: 1px solid #111111;
-  width: 16%;
-  height: 50px;
+  width: 25%;
+  height: 30px;
   font-weight: bold;
   text-align: center;
 }
@@ -44,7 +44,6 @@ body {
   border: none;
   width: 16%;
   height: 20px;
-  font-size: 0.7em;
   font-weight: bold;
   text-align: center;
 }
@@ -55,7 +54,6 @@ body {
   border: none;
   width: 16%;
   height: 20px;
-  font-size: 0.7em;
   font-weight: bold;
   text-align: center;
 }
@@ -95,13 +93,14 @@ canvas {
     height: 30px;
 }
 .control-left, .control-right {
-  width: 38%;
+  width: 35%;
 }
 .control-center {
-  width: 24%
+  width: 30%
 }
 
 .dir {
+  display: block;
   opacity: 0;
   border-radius: 10px;
   background-color: #586a8f;
@@ -110,23 +109,27 @@ canvas {
   font-size: 1em;
 }
 #up, #down, #center {
-    display: block;
     width: 100%;
 }
 #up, #down {
   height: 40%;
 }
 #center {
+    display: block;
     background-color: transparent;
     border: none;
     height: 20%;
 }
 #left, #right {
     width: 100%;
-    height: 100%;
+    height: 50%;
+}
+#left-up, #left-down, #right-up, #right-down {
+  width: 100%;
+  height: 25%;
 }
 
-/* MQ MQ MQ MQ MQ MQ MQ MQ MQ */
+/* --- Media Query --- */
 @media (max-width: 550px) {
   body {
     background-color: #111111;
@@ -134,11 +137,6 @@ canvas {
 
   .dashboard {
     width: 100vw;
-  }
-
-  #btn-one, #btn-two, #btn-three, #btn-four {
-    width: 25vw;
-    height: 4vh;
   }
 
   /* // CANVAS // */
@@ -153,8 +151,8 @@ canvas {
     height: 30vh;
   }
   .dir {
-    opacity: 0.6;
+    opacity: 0.8;
     font-size: 3em;
   }
 }
-/* MQ MQ MQ MQ MQ MQ MQ MQ MQ */
+/* --- Media Query --- */
