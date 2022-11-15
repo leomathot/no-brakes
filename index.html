@@ -1,447 +1,50 @@
-<html>
-<head>
-<title>Car Game</title>
-<script type="text/javascript">
-
-var canvas, ctx;
-var bug = [];
-var ppl = [];
-var player = [];
-var num_bugs = 10;
-var num_ppl = 6;
-var dead_bugs_count = 0;
-var dead_ppl_count = 0;
-var start_score = 50;
-var time = 120;
-var pplVel = 3;
-var bugsVel = 3;
-var left, right;
-var horizontalMov = 0;
-var inverter= -1;
-var leftKey = 0;
-var rightKey = 0;
-// loop 10 ms
-
-function load() {
-    
-    canvas = document.getElementById("can");
-    ctx = canvas.getContext("2d");
-
-    // buttons
-    left = document.getElementById("left");
-    right = document.getElementById("right");
-
-    // ppl
-    for (var i = 0; i < num_ppl; i++) {
-        ppl[i] = new Person();
-    }
-
-    // bugs
-    for (var i = 0; i < num_bugs; i++) {
-        bug[i] = new Bug();
-    }
-
-    // player
-    player[0] = new Player();
-
-    // actualization
-    loop();
-}  
-
-// timer
-function countDown() {
-  time--;
-  if (time > 0) {
-    setTimeout(countDown, 1000);
-  }
-}
-setTimeout(countDown, 1000);
-
-// create player
-function Player() {
-    this.x = 500;
-    this.y = 720;
-}
-
-// player update
-Player.prototype.update = function () {
-
-    //arrow keys down
-    document.onkeydown = function (e) {
-                var key_code = e.which || e.keyCode;
-                switch (key_code) {
-                    case 37: //left arrow key
-                        leftKey++;
-                        horizontalMov = -1.5;
-                        break;
-                    case 39: //right arrow key
-                        rightKey++;
-                        horizontalMov = 1.5;
-                        break;
-                }
-    }
-    //arrow keys up
-    document.onkeyup = function (e) {
-                var key_code = e.which || e.keyCode;
-                switch (key_code) {
-                    case 37: //left arrow key
-                        leftKey++;
-                        horizontalMov = 0;
-                        break;
-                    case 39: //right arrow key
-                        rightKey++;
-                        horizontalMov = 0;
-                        break;
-                }
-    }
-
-    // screen touch
-    // touchstart
-    left.addEventListener("touchstart", function () {
-        horizontalMov = -1.5;
-    });
-    right.addEventListener("touchstart", function () {
-        horizontalMov = 1.5;
-    });
-    // touchend
-    left.addEventListener("touchend", function () {
-        horizontalMov = 0;
-    });
-    right.addEventListener("touchend", function () {
-        horizontalMov = 0;
-    });
-
-
-    // mouse over left and right buttons
-    // letf btn
-    /*left.addEventListener('mouseover', function () {
-        horizontalMov = -1.5;
-    });
-    left.addEventListener('mouseout', function () {
-        horizontalMov = 0;
-    });
-    // right btn
-    right.addEventListener('mouseover', function () {
-        horizontalMov = 1.5;
-    });
-    right.addEventListener('mouseout', function () {
-        horizontalMov = 0;
-    });*/
-
-    // horizontal movement
-    if (horizontalMov < 0 && this.x > 20) {
-        this.x = this.x + (horizontalMov * 3); // left
-    } else if (horizontalMov > 0 && this.x < 980) {
-        this.x = this.x + (horizontalMov * 3); // right
-    }
-}
-
-// create people
-function Person() {
-    this.x = (Math.random() * canvas.width + (canvas.width / 2)) / 2;
-    this.y = (Math.random() * canvas.height + (canvas.height / 2)) / 2 - 1200;
-    this.xvel = Math.random() * 2;
-    this.yvel = Math.random() * pplVel + 2; // min=2 max=2+pplVel
-    this.color = 0;
-    this.status = "alive";
-}
-
-// people update
-Person.prototype.update = function () {
-    if (this.status == "alive") {
-        this.x += this.xvel;
-        this.y += this.yvel;
-        if (this.x > canvas.width - 20 || this.x < 20) {
-            this.xvel = -this.xvel;
-        }
-        // reach lower limit => start again
-        if (this.y > canvas.height) {
-            this.y = -60;
-            this.xvel = (-this.xvel) * inverter;
-            inverter = -inverter;
-        }
-    } else {
-        this.color = 1;
-        this.x += this.xvel;
-        this.y += this.yvel;
-        if (this.y > canvas.height) {
-            this.y = -60;
-            this.status = "alive";
-            this.color = 0;
-            dead_ppl_count++;
-        }
-    }
-    // ppl death
-    if ((this.x - player[0].x < 60 && this.x - player[0].x > -60) && (this.y - player[0].y < 150 && this.y - player[0].y > -20)) {
-        this.status = "dead";
-    }
-}
-
-// create bugs
-function Bug() {
-    this.x = (Math.random() * canvas.width + (canvas.width / 2)) / 2;
-    this.y = (Math.random() * canvas.height + (canvas.height / 2)) / 2 - 1000;
-    this.xvel = Math.random() * 1;
-    this.yvel = Math.random() * bugsVel + 2; // min=2 max=2+bugsVel
-    this.color = 0;
-    this.status = "alive";
-}
-
-// bugs update
-Bug.prototype.update = function () {
-    if (this.status == "alive") {
-        this.x += this.xvel;
-        this.y += this.yvel;
-        if (this.x > canvas.width - 20 || this.x < 20) {
-            this.xvel = -this.xvel;
-        }
-        // reach lower limit => start again
-        if (this.y > canvas.height) {
-            this.y = -60;
-            this.xvel = (-this.xvel) * inverter;
-            inverter = -inverter;
-        }
-    } else {
-        this.color = 1;
-        this.x += this.xvel;
-        this.y += this.yvel;
-        if (this.y > canvas.height) {
-            this.y = -60;
-            this.status = "alive";
-            this.color = 0;
-            dead_bugs_count++;
-        }
-    }
-    // bug death
-    if ((this.x - player[0].x < 60 && this.x - player[0].x > -60) && (this.y - player[0].y < 150 && this.y - player[0].y > -20)) {
-        this.status = "dead";
-    }
-}
-
-function loop() {
-
-    // buckground
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#CCCCDD';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // people update
-    for (var i = 0; i < num_ppl; i++) {
-        ppl[i].update();
-        // arms
-        ctx.fillStyle = '#8d9c62';
-        ctx.fillRect(ppl[i].x - 30, ppl[i].y + 20, 20, 10);
-        ctx.fillRect(ppl[i].x + 10, ppl[i].y + 20, 20, 10);
-        // body
-        ctx.fillStyle = '#778255';
-        ctx.fillRect(ppl[i].x - 15, ppl[i].y + 20, 30, 20);
-        //legs
-        ctx.fillRect(ppl[i].x - 15, ppl[i].y + 40, 10, 20);
-        ctx.fillRect(ppl[i].x + 5, ppl[i].y + 40, 10, 20);
-        // head
-        if (ppl[i].color == 0) {
-            ctx.fillStyle = '#f2c794'; // alive
-        } else if (ppl[i].color == 1) {
-            ctx.fillStyle = '#D7220A'; // dead
-        }
-        ctx.fillRect(ppl[i].x - 20, ppl[i].y - 20, 40, 40);
-        // mouth
-        ctx.fillStyle = '#4a1a14';
-        ctx.fillRect(ppl[i].x - 10, ppl[i].y + 5, 20, 15);
-        // tongue
-        ctx.fillStyle = '#BB0000';
-        ctx.fillRect(ppl[i].x - 5, ppl[i].y + 15, 10, 5);
-        // eyes
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(ppl[i].x - 15, ppl[i].y - 10, 10, 10);
-        ctx.fillRect(ppl[i].x + 5, ppl[i].y - 10, 10, 10);
-    }
-    
-    // bugs update
-    for (var i = 0; i < num_bugs; i++) {
-        bug[i].update();
-        // body
-        ctx.fillStyle = '#317a66';
-        ctx.fillRect(bug[i].x - 15, bug[i].y + 20, 30, 20);
-        //legs
-        ctx.fillRect(bug[i].x - 15, bug[i].y + 40, 10, 20);
-        ctx.fillRect(bug[i].x + 5, bug[i].y + 40, 10, 20);
-        // arms
-        ctx.fillStyle = '#3e9c70';
-        ctx.fillRect(bug[i].x - 20, bug[i].y + 20, 10, 20);
-        ctx.fillRect(bug[i].x + 10, bug[i].y + 20, 10, 20);
-        // head
-        if (bug[i].color == 0) {
-            ctx.fillStyle = '#1ACC0A'; // alive
-        } else if (bug[i].color == 1) {
-            ctx.fillStyle = '#0c7773'; // dead
-        }
-        ctx.fillRect(bug[i].x - 20, bug[i].y - 20, 40, 40);
-        // eyes
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(bug[i].x - 15, bug[i].y - 10, 10, 10);
-        ctx.fillRect(bug[i].x + 5, bug[i].y - 10, 10, 10);
-    }
-    
-    // player update
-    player[0].update();
-    // tyres
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(player[0].x - 45, player[0].y + 10, 20, 40);
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(player[0].x + 25, player[0].y + 10, 20, 40);
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(player[0].x - 47, player[0].y + 125, 20, 40);
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(player[0].x + 27, player[0].y + 125, 20, 40);
-    // front bumper
-    ctx.fillStyle = '#EE0022';
-    ctx.fillRect(player[0].x - 38, player[0].y - 4, 76, 20);
-    // body 80 x 190
-    ctx.fillStyle = '#EE0022';
-    ctx.fillRect(player[0].x - 40, player[0].y, 80, 170);
-    // strips
-    ctx.fillStyle = '#DDDDDD';
-    ctx.fillRect(player[0].x - 20, player[0].y, 10, 170);
-    ctx.fillStyle = '#DDDDDD';
-    ctx.fillRect(player[0].x + 5, player[0].y, 10, 170);
-    // glasses
-    ctx.fillStyle = '#555577';
-    ctx.fillRect(player[0].x - 30, player[0].y + 50, 60, 85);
-    // roof
-    ctx.fillStyle = '#FF0011';
-    ctx.fillRect(player[0].x - 30, player[0].y + 55, 60, 60);
-    // back
-    ctx.fillStyle = '#CC0011';
-    ctx.fillRect(player[0].x - 40, player[0].y + 160, 80, 15);
-    // back lights
-    ctx.fillStyle = '#f79f2d';
-    ctx.fillRect(player[0].x - 35, player[0].y + 165, 5, 7);
-    ctx.fillRect(player[0].x + 30, player[0].y + 165, 5, 7);
-    ctx.fillStyle = '#FF0011';
-    ctx.fillRect(player[0].x - 25, player[0].y + 165, 10, 7);
-    ctx.fillRect(player[0].x + 15, player[0].y + 165, 10, 7);
-    // back bumper
-    ctx.fillStyle = '#919a9e';
-    ctx.fillRect(player[0].x - 39, player[0].y + 173, 78, 7);
-
-    score = start_score + dead_bugs_count - dead_ppl_count * 3;
-    // info
-    document.getElementById("info-one").value = leftKey;
-    document.getElementById("info-two").value = rightKey;
-    // outputs
-    document.getElementById("output-one").value = "(o o)  -"  + dead_ppl_count;
-    document.getElementById("output-two").value = "(x x)  " + dead_bugs_count;
-    document.getElementById("output-three").value = score;
-    document.getElementById("output-four").value = "TIME: " + time;
-
-    // 
-    setTimeout(loop, 10);
-}
-
-</script>
-<style>
-body {
-  background-color:#222240;
-  text-align:center;
-}
-canvas {
-  background-color:#9CDAC5;
-  border:3px solid #222222;
-  height: 80%;
-  margin: 50px, 10px;
-}
-.control {
-    position: relative;
-    top: -40vh;
-    margin: auto;
-}
-.dir {
-    width: 120px;
-    height: 35vh;
-    border-radius: 10%;
-    opacity: 0.2;
-    background-color: #AABBDD;
-    border: 2px solid #666699;
-    color: #666677;
-    font-size: 4em;
-}
-/*.dir:hover {
-    background-color: #90A0CC;
-}*/
-.dir:active {
-    background-color: #90A0CC;
-}
-#center {
-    background-color: transparent;
-    border: none;
-    width: 120px;
-    height: 40px;
-}
-form {
-    position: relative;
-    top: 10;
-}
-input {
-  background-color:#AABBDD;
-  border: 3px solid #222222;
-  width: 100px;
-}
-#output-one {
-    background-color: #cddbdf;
-    color: #d85420;
-    font-weight: bold;
-    text-align: center;
-}
-#output-two {
-    background-color: #cddbdf;
-    color: rgb(3, 117, 79);
-    font-weight: bold;
-    text-align: center;
-}
-#output-three {
-    background-color: #cddbdf;
-    color: #879e07;
-    font-weight: bold;
-    text-align: center;
-}
-#output-four {
-    background-color: #cddbdf;
-    color: #7e6576;
-    font-weight: bold;
-    text-align: center;
-}
-#btn1, #btn2, #btn3, #btn4 {
-    background-color:#AABBDD;
-    border: 3px solid #222222;
-    width: 100px;
-}
-</style>
-</head>
-<body onload="load();">
-    <form>
-        <input type = "text" id="info-one" value = "0" /> 
-        <input type = "text" id="info-two" value = "0" />
-        <input type = "text" id="info-three" value = "0" />
-        <input type = "text" id="info-four" value = "0" />
-    </form>
-    <form>
-        <input type = "text" id="output-one" value = "0" /> 
-        <input type = "text" id="output-two" value = "0" />
-        <input type = "text" id="output-three" value = "0" />
-        <input type = "text" id="output-four" value = "0" />
-    </form>
-    <canvas id="can" width = "1000" height="1100"></canvas>
-    <div class="btn-div">
-        <button id="btn1">0</button>
-        <button id="btn2">0</button>
-        <button id="btn3">0</button>
-        <button id="btn4">0</button>
-    </div>
-    <div class="control">
-        <button class="dir" id="left">&#8678;</button>
-        <button id="center"></button>
-        <button class="dir" id="right">&#8680;</button>
-    </div>
-</body>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, inctial-scale=1.0" />
+        <title>No brakes</title>
+        <link rel="stylesheet" href="./styles.css" />
+    </head>
+    <body onload="start()">
+        <div class="dashboard">
+            <div class="dashboard-level-1">
+                <button class="btn" id="btn-one">-</button>
+                <button class="btn" id="btn-two">-</button>
+                <button class="btn" id="btn-three">-</button>
+                <button class="btn" id="btn-four">-</button>
+            </div>
+            <form class="dashboard-level-2">
+                <input type = "text" class="info" id="info-one" value = "0" /> 
+                <input type = "text" class="info" id="info-two" value = "0" />
+                <input type = "text" class="info" id="info-three" value = "0" />
+                <input type = "text" class="info" id="info-four" value = "0" />
+                <input type = "text" class="info" id="info-five" value = "0" />
+                <input type = "text" class="info" id="info-six" value = "0" />
+            </form>
+            <form class="dashboard-level-3">
+                <input type = "text" class="output" id="output-one" value = "0" /> 
+                <input type = "text" class="output" id="output-two" value = "0" />
+                <input type = "text" class="output" id="output-three" value = "0" />
+                <input type = "text" class="output" id="output-four" value = "0" />
+                <input type = "text" class="output" id="output-five" value = "0" />
+                <input type = "text" class="output" id="output-six" value = "0" />
+            </form>
+        </div>
+        <canvas id="can" width = "1000" height="1100"></canvas>
+        <div class="control">
+            <div class="control-left">
+                <button class="dir" id="left">&#8678;</button>
+            </div>
+            <div class="control-center">
+                <button class="dir" id="up">&#8679;</button>
+                <button id="center"></button>
+                <button class="dir" id="down">&#8681;</button>
+            </div>
+            <div class="control-right">
+                <button class="dir" id="right">&#8680;</button>
+            </div>
+        </div>
+        <script type="text/javascript" src="myscripts.js"></script>
+    </body>
 </html>
