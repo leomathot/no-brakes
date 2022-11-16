@@ -7,19 +7,16 @@ var num_bugs = 10;
 var num_ppl = 6;
 var dead_bugs_count = 0;
 var dead_ppl_count = 0;
-var start_score = 50;
-var level = 1;
+var progress = 50;
+var points = 0;
+var level = 10;
+var velRate = 1;
+var vel = level * velRate;
 var time = 61;
-var pplVerticalVel = 3;
-var pplHorizontalVel;
-var bugsVerticalVel = 3;
-var bugsHoizontalVel;
 var left, right, up, down, leftUp, leftDown, rightUp, rightDown;
 var horizontalMov = 0;
 var verticalMov = 0;
 var inverter= -1;
-var leftKey = 0;
-var rightKey = 0;
 // loop 10 ms
 
 // start
@@ -170,33 +167,33 @@ Player.prototype.update = function () {
     // movement
     // horizontal movement
     if (horizontalMov < 0 && this.x > 20) {
-        this.x = this.x + (horizontalMov * 3); // left
+        this.x = this.x + (horizontalMov * 3) - vel / 20; // left
     } else if (horizontalMov > 0 && this.x < 980) {
-        this.x = this.x + (horizontalMov * 3); // right
+        this.x = this.x + (horizontalMov * 3) + vel / 20; // right
     }
     // vertical movement
     if (verticalMov < 0 && this.y > 50) {
-        this.y = this.y + (verticalMov * 3); // left
-    } else if (verticalMov > 0 && this.y < 980) {
-        this.y = this.y + (verticalMov * 3); // right
+        this.y = this.y + (verticalMov * 3) - vel / 20; // up
+    } else if (verticalMov > 0 && this.y < 950) {
+        this.y = this.y + (verticalMov * 3) + vel / 20; // down
     }
 }
 
 // create people
 function Person() {
     this.x = (canvas.width / 4) + Math.random() * canvas.width / 2;
-    this.y = -200;
-    sign = Math.sign(0.5 - Math.random());
-    this.xvel = Math.random() * 2 * sign;
-    this.yvel = Math.random() * pplVerticalVel + 2; // min=2 max=2+pplVerticalVel
-    this.color = 0;
+    this.y = -100 - Math.random() * 400;
+    sign = Math.sign(0.5 - Math.random()); // random sign
+    this.xvel = (Math.random() * 2 + vel / 25) * sign; // 0.04-2.04 0.04-6
+    this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
     this.status = "alive";
 }
 
 // people position and state update
 Person.prototype.update = function () {
     // side bounce
-    if (this.x > canvas.width - 30 || this.x < 30) {
+    // second conditions just in case they get between the 30px limit and beyond
+    if ((this.x > canvas.width - 30 && this.xvel > 0) || (this.x < 30 && this.xvel < 0)) {
         this.xvel = -this.xvel;
     }
     // keep moving
@@ -214,13 +211,26 @@ Person.prototype.update = function () {
         // update status
         this.status = "dead";
         this.xvel = 0;
+        if (this.y < player[0].y + 30) {
+        this.yvel = - 20 - vel / 10;
+        } else {
+            this.yvel = 20 + vel / 10;
+        }
+        if (this.x < player[0].x - 40) {
+            this.yvel /= 2;
+            this.xvel = - 10 - vel / 20;
+        }
+        if (this.x > player[0].x + 40) {
+            this.yvel /= 2;
+            this.xvel = 10 + vel / 20;
+        }
     }
-    // reach lower limit => start again (alive)
-    if (this.y > canvas.height + 50) {
+    // reaches lower limit or flies away => start again (alive)
+    if (this.y > canvas.height + 50 || (this.y < - 100 && this.yvel < -0)) {
         this.y = -150;
         sign = Math.sign(0.5 - Math.random()); // random sign
-        this.xvel = Math.random() * 2 * sign;
-        this.yvel = Math.random() * pplVerticalVel + 2; // min=2 max=2+pplVerticalVel
+        this.xvel = (Math.random() * 2 + vel / 25) * sign; // 0.04-2.04 0.04-6
+        this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
         this.status = "alive";
     }
 }
@@ -302,18 +312,18 @@ Person.prototype.print = function(genre) {
 // create bugs
 function Bug() {
     this.x = (canvas.width / 4) + Math.random() * canvas.width / 2;
-    this.y = -1000;
-    sign = Math.sign(0.5 - Math.random());
-    this.xvel = Math.random() * sign;
-    this.yvel = Math.random() * bugsVerticalVel + 2;  // min=2 max=2+bugsVerticalVel
-    this.color = 0;
+    this.y = -500 - Math.random() * 500;;
+    sign = Math.sign(0.5 - Math.random()); // random sign
+    this.xvel = (Math.random() + vel / 25) * sign; // 0.04-1.04 0.04-5
+    this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
     this.status = "alive";
 }
 
 // bugs position and state update
 Bug.prototype.update = function () {
     // side bounce
-    if (this.x > canvas.width - 30 || this.x < 30) {
+    // second conditions just in case they get between the 30px limit and beyond
+    if ((this.x > canvas.width - 30 && this.xvel > 0) || (this.x < 30 && this.xvel < 0)) {
         this.xvel = -this.xvel;
     }
     // keep moving
@@ -327,17 +337,31 @@ Bug.prototype.update = function () {
         // count + 1
         if (this.status == 'alive') {
             dead_bugs_count++;
+            points++;
         }
         // update status
         this.status = "dead";
         this.xvel = 0;
+        if (this.y < player[0].y + 30) {
+        this.yvel = - 20 - vel / 10;
+        } else {
+            this.yvel = 20 + vel / 10;
+        }
+        if (this.x < player[0].x - 40) {
+            this.yvel /= 2;
+            this.xvel = - 10 - vel / 20;
+        }
+        if (this.x > player[0].x + 40) {
+            this.yvel /= 2;
+            this.xvel = 10 + vel / 20;
+        }
     }
-    // reach lower limit => start again (alive)
-    if (this.y > canvas.height + 50) {
+    // reaches lower limit or flies away => start again (alive)
+    if (this.y > canvas.height + 50 || (this.y < - 100 && this.yvel < -0)) {
         this.y = -150;
         sign = Math.sign(0.5 - Math.random()); // random sign
-        this.xvel = Math.random() * sign;
-        this.yvel = Math.random() * bugsVerticalVel + 2; // min=2 max=2+bugsVerticalVel
+        this.xvel = (Math.random() + vel / 25) * sign; // 0.04-1.04 0.04-5
+        this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
         this.status = "alive";
     }
 }
@@ -437,7 +461,7 @@ function loop() {
     // front bumper
     ctx.fillStyle = '#EE0022';
     ctx.fillRect(player[0].x - 38, player[0].y - 4, 76, 20);
-    // body 80 x 190
+    // body 80 x 170
     ctx.fillStyle = '#EE0022';
     ctx.fillRect(player[0].x - 40, player[0].y, 80, 170);
     // strips
@@ -465,19 +489,20 @@ function loop() {
     ctx.fillRect(player[0].x - 39, player[0].y + 173, 78, 7);
 
     // info
-    score = start_score + dead_bugs_count - dead_ppl_count * 3;
     document.getElementById("info-one").value = "People";
     document.getElementById("info-two").value = "Zombies";
-    document.getElementById("info-three").value = "Points";
+    document.getElementById("info-three").value = "Progress";
     document.getElementById("info-four").value = "Time";
+    document.getElementById("info-five").value = "Level";
+    document.getElementById("info-six").value = "Points";
     // outputs
     document.getElementById("output-one").value = "(o o)  -"  + dead_ppl_count;
     document.getElementById("output-two").value = "(x x)  " + dead_bugs_count;
-    document.getElementById("output-three").value = score;
+    document.getElementById("output-three").value = progress + dead_bugs_count - dead_ppl_count * 3;
     document.getElementById("output-four").value = time;
+    document.getElementById("output-five").value = level;
+    document.getElementById("output-six").value = points;
 
     // 
     setTimeout(loop, 10);
-}
-
-  
+}  
