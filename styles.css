@@ -18,6 +18,7 @@ body {
 .dashboard-level-1 {
   display: flex;
   justify-content: center;
+  margin: 20px 0;
 }
 .dashboard-level-2 {
   display: flex;
@@ -29,6 +30,7 @@ body {
 }
 
 .btn {
+  display: none;
   background-color: #444477;
   color: #486a9e;
   border: 1px solid #111111;

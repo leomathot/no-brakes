@@ -12,7 +12,7 @@ let points = 0;
 let level = 10;
 let velRate = 1;
 let vel = level * velRate;
-let time = 61;
+let time = 60;
 let left, right, up, down, leftUp, leftDown, rightUp, rightDown;
 let horizontalMov = 0;
 let verticalMov = 0;
@@ -56,7 +56,6 @@ function load() {
 
 // timer
 // function countDown() {
-//     console.log('loop')
 //     setTimeout(countDown, 1000);
 // }
 // countDown();
@@ -182,57 +181,82 @@ Player.prototype.update = function () {
 
 // create people
 function Person() {
-    this.x = (canvas.width / 4) + Math.random() * canvas.width / 2;
-    this.y = -100 - Math.random() * 400;
+    this.x = [(canvas.width / 4) + Math.random() * canvas.width / 2];
+    this.y = [-100 - Math.random() * 400];
     sign = Math.sign(0.5 - Math.random()); // random sign
-    this.xvel = (Math.random() * 2 + vel / 25) * sign; // 0.04-2.04 0.04-6
-    this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
-    this.status = "alive";
+    this.xvel = [(Math.random() * 2 + vel / 25) * sign]; // 0.04-2.04 0.04-6
+    this.yvel = [2 + Math.random() * 3 + Math.random() * (vel / 10)]; // 2-5.1 / 2-15
+    this.status =[ "alive"];
 }
 
 // people position and state update
 Person.prototype.update = function () {
+
     // side bounce
     // second conditions just in case they get between the 30px limit and beyond
-    if ((this.x > canvas.width - 30 && this.xvel > 0) || (this.x < 30 && this.xvel < 0)) {
-        this.xvel = -this.xvel;
+    if ((this.x[0] > canvas.width - 30 && this.xvel[0] > 0) || (this.x[0] < 30 && this.xvel[0] < 0)) {
+        this.xvel.push(this.xvel[0] * -1);
+        this.xvel.shift();
     }
+
     // keep moving
-    this.x += this.xvel;
-    this.y += this.yvel;
+    this.x.push(this.x[0] + this.xvel[0]);
+    this.x.shift();
+    this.y.push(this.y[0] + this.yvel[0]);
+    this.y.shift();
+
     // ppl death
-    if ((this.x - player[0].x < 60 && this.x - player[0].x > -60) && (this.y - player[0].y < 190 && this.y - player[0].y > -40)) {
+    if ((this.x[0] - player[0].x < 60 && this.x[0] - player[0].x > -60) && (this.y[0] - player[0].y < 190 && this.y[0] - player[0].y > -40)) {
+
         // crash color
         ctx.fillStyle = '#db0f2e';
-        ctx.fillRect(this.x - 30, this.y - 30, 60, 95);
-        // count + 1
-        if (this.status == 'alive') {
+        ctx.fillRect(this.x[0] - 30, this.y[0] - 30, 60, 95);
+
+        // add 1 person dead
+        if (this.status[0] == 'alive') {
             dead_ppl_count++;
         }
         // update status
-        this.status = "dead";
-        this.xvel = 0;
-        if (this.y < player[0].y + 30) {
-        this.yvel = - 20 - vel / 10;
+        this.status.push("dead");
+        this.status.shift();
+
+        this.xvel.push(0);
+        this.xvel.shift();
+
+        if (this.y[0] < player[0].y + 30) {
+        this.yvel.push(- 20 - vel / 10);
+        this.yvel.shift();
         } else {
-            this.yvel = 20 + vel / 10;
+            this.yvel.push(20 + vel / 10);
+            this.yvel.shift();
         }
-        if (this.x < player[0].x - 40) {
-            this.yvel /= 2;
-            this.xvel = - 10 - vel / 20;
+        if (this.x[0] < player[0].x - 40) {
+            this.yvel.push(this.yvel[0] / 2);
+            this.yvel.shift();
+            this.xvel.push(- 10 - vel / 20);
+            this.xvel.shift();
         }
-        if (this.x > player[0].x + 40) {
-            this.yvel /= 2;
-            this.xvel = 10 + vel / 20;
+        if (this.x[0] > player[0].x + 40) {
+            this.yvel.push(this.yvel[0] / 2);
+            this.yvel.shift();
+            this.xvel.push(10 + vel / 20);
+            this.xvel.shift();
         }
     }
     // reaches lower limit or flies away => start again (alive)
-    if (this.y > canvas.height + 50 || (this.y < - 100 && this.yvel < -0)) {
-        this.y = -150;
+    if (this.y[0] > canvas.height + 50 || (this.y[0] < - 100 && this.yvel[0] < -0)) {
+        this.y.push(-150);
+        this.y.shift();
+
         sign = Math.sign(0.5 - Math.random()); // random sign
-        this.xvel = (Math.random() * 2 + vel / 25) * sign; // 0.04-2.04 0.04-6
-        this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
-        this.status = "alive";
+
+        this.xvel.push((Math.random() + vel / 25) * sign); // 0.04-1.04 0.04-5
+        this.xvel.shift();
+        this.yvel.push(2 + Math.random() * 3 + Math.random() * (vel / 10)); // 2-5.1 / 2-15
+        this.yvel.shift();
+
+        this.status.push("alive");
+        this.status.shift();
     }
 }
 
@@ -240,84 +264,78 @@ Person.prototype.update = function () {
 Person.prototype.print = function(genre) {
     // female
     if (genre == 0) { 
-        bodyColor = '#e864d4';
+        bodyColor = '#f864e4';
         armsColor = '#debb8c';
-        legsColor = '#9d79a3';
+        legsColor = '#503030';
         aliveColor = '#f5ce98';
         deadColor = '#D7220A';
         mouthColor = '#4a1a14';
         tongueColor = '#FF0000';
-        hairColor = '#666666';
+        hairColor = '#444';
         eyesColor = '#000000';
     // male
     } else {
         bodyColor = '#5555cc';
         armsColor = '#debb8c';
-        legsColor = '#627c8a';
+        legsColor = '#303040';
         aliveColor = '#f2c794';
         deadColor = '#e34a17';
         mouthColor = '#4a1a14';
         tongueColor = '#FF0000';
-        hairColor = '#777777';
+        hairColor = '#222';
         eyesColor = '#000000';
     }
      // body
      ctx.fillStyle = bodyColor;
-     ctx.fillRect(this.x - 15, this.y + 20, 30, 20);
+     ctx.fillRect(this.x[0] - 15, this.y[0] + 20, 30, 20);
      //legs
      ctx.fillStyle = legsColor;
-     ctx.fillRect(this.x - 15, this.y + 40, 10, 20);
-     ctx.fillRect(this.x + 5, this.y + 40, 10, 20);
-     ctx.fillRect(this.x - 15, this.y + 30, 30, 10);
+     ctx.fillRect(this.x[0] - 15, this.y[0] + 40, 10, 20);
+     ctx.fillRect(this.x[0] + 5, this.y[0] + 40, 10, 20);
+     ctx.fillRect(this.x[0] - 15, this.y[0] + 30, 30, 10);
      // arms
      ctx.fillStyle = armsColor;
-     ctx.fillRect(this.x - 30, this.y + 20, 15, 10);
-     ctx.fillRect(this.x + 15, this.y + 20, 15, 10);
+     ctx.fillRect(this.x[0] - 30, this.y[0] + 20, 15, 10);
+     ctx.fillRect(this.x[0] + 15, this.y[0] + 20, 15, 10);
      // head
-     if (this.status == 'alive') {
+     if (this.status[0] == 'alive') {
          ctx.fillStyle = aliveColor; // alive
-     } else if (this.status == 'dead') {
+     } else if (this.status[0] == 'dead') {
          ctx.fillStyle = deadColor; // dead
      }
-     ctx.fillRect(this.x -20, this.y - 20, 40, 40);
+     ctx.fillRect(this.x[0] -20, this.y[0] - 20, 40, 40);
      //
      if (genre == 0) {
         // hair
         ctx.fillStyle = hairColor;
-        ctx.fillRect(this.x - 20, this.y - 25, 40, 10);
-        ctx.fillRect(this.x - 25, this.y - 15, 5, 40);
-        ctx.fillRect(this.x + 20, this.y - 15, 5, 40);
+        ctx.fillRect(this.x[0] - 20, this.y[0] - 25, 40, 10);
+        ctx.fillRect(this.x[0] - 25, this.y[0] - 15, 5, 40);
+        ctx.fillRect(this.x[0] + 20, this.y[0] - 15, 5, 40);
         // mouth
         ctx.fillStyle = mouthColor;
-        ctx.fillRect(this.x - 10, this.y + 5, 20, 25);
+        ctx.fillRect(this.x[0] - 10, this.y[0] + 3, 20, 20);
         // tongue
         ctx.fillStyle = tongueColor;
-        ctx.fillRect(this.x - 5, this.y + 20, 10, 7);
+        ctx.fillRect(this.x[0] - 5, this.y[0] + 16, 10, 7);
     } else {
         // hair
         ctx.fillStyle = hairColor;
-        ctx.fillRect(this.x - 20, this.y - 20, 40, 5);
+        ctx.fillRect(this.x[0] - 20, this.y[0] - 20, 40, 5);
         // mouth
         ctx.fillStyle = mouthColor;
-        ctx.fillRect(this.x - 10, this.y + 5, 20, 15);
+        ctx.fillRect(this.x[0] - 10, this.y[0] + 5, 20, 15);
         // tongue
         ctx.fillStyle = tongueColor;
-        ctx.fillRect(this.x - 5, this.y + 17, 10, 3);
+        ctx.fillRect(this.x[0] - 5, this.y[0] + 17, 10, 3);
     }
      // eyes
      ctx.fillStyle = eyesColor;
-     ctx.fillRect(this.x - 15, this.y - 10, 10, 10);
-     ctx.fillRect(this.x + 5, this.y - 10, 10, 10);
+     ctx.fillRect(this.x[0] - 15, this.y[0] - 10, 10, 10);
+     ctx.fillRect(this.x[0] + 5, this.y[0] - 10, 10, 10);
 }
 
 // create bugs
-function Bug() {
-    // this.x = (canvas.width / 4) + Math.random() * canvas.width / 2;
-    // this.y = -500 - Math.random() * 500;
-    // sign = Math.sign(0.5 - Math.random()); // random sign
-    // this.xvel = (Math.random() + vel / 25) * sign; // 0.04-1.04 0.04-5
-    // this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
-    // this.status = "alive";
+function Bug() {;
     this.x = [(canvas.width / 4) + Math.random() * canvas.width / 2];
     this.y = [-500 - Math.random() * 500];
     sign = Math.sign(0.5 - Math.random()); // random sign
@@ -331,62 +349,36 @@ Bug.prototype.update = function () {
 
     // side bounce
     // second conditions just in case they get between the 30px limit and beyond
-    // if ((this.x > canvas.width - 30 && this.xvel > 0) || (this.x < 30 && this.xvel < 0)) {
-    //     this.xvel = -this.xvel;
-    // }
     if ((this.x[0] > canvas.width - 30 && this.xvel[0] > 0) || (this.x[0] < 30 && this.xvel[0] < 0)) {
         this.xvel.push(this.xvel[0] * -1);
         this.xvel.shift();
     }
 
     // keep moving
-    // this.x += this.xvel;
-    // this.y += this.yvel;
     this.x.push(this.x[0] + this.xvel[0]);
     this.x.shift();
     this.y.push(this.y[0] + this.yvel[0]);
     this.y.shift();
 
     // bug death
-    // if ((this.x - player[0].x < 60 && this.x - player[0].x > -60) && (this.y - player[0].y < 190 && this.y - player[0].y > -40)) {
     if ((this.x[0] - player[0].x < 60 && this.x[0] - player[0].x > -60) && (this.y[0] - player[0].y < 190 && this.y[0] - player[0].y > -40)) {
 
         // crash color
         ctx.fillStyle = '#52eb0c';
-        // ctx.fillRect(this.x - 30, this.y - 30, 60, 95);
         ctx.fillRect(this.x[0] - 30, this.y[0] - 30, 60, 95);
 
         // add 1 bug dead
-        // if (this.status == 'alive') {
-        //     dead_bugs_count++;
-        //     points++;
-        // }
         if (this.status[0] == 'alive') {
             dead_bugs_count++;
             points++;
         }
 
         // update status
-        // this.status = "dead";
-        // this.xvel = 0;
-        // if (this.y < player[0].y + 30) {
-        // this.yvel = - 20 - vel / 10;
-        // } else {
-        //     this.yvel = 20 + vel / 10;
-        // }
-        // if (this.x < player[0].x - 40) {
-        //     this.yvel /= 2;
-        //     this.xvel = - 10 - vel / 20;
-        // }
-        // if (this.x > player[0].x + 40) {
-        //     this.yvel /= 2;
-        //     this.xvel = 10 + vel / 20;
-        // }
         this.status.push("dead");
         this.status.shift();
 
         this.xvel.push(0);
-        this.xvel.sift();
+        this.xvel.shift();
 
         if (this.y[0] < player[0].y + 30) {
         this.yvel.push(- 20 - vel / 10);
@@ -409,13 +401,7 @@ Bug.prototype.update = function () {
         }
     }
 
-    // reaches lower limit or flies away => start again (alive)
-    // if (this.y > canvas.height + 50 || (this.y < - 100 && this.yvel < -0)) {
-    //     this.y = -150;
-    //     sign = Math.sign(0.5 - Math.random()); // random sign
-    //     this.xvel = (Math.random() + vel / 25) * sign; // 0.04-1.04 0.04-5
-    //     this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
-    //     this.status = "alive";
+    // if it reaches lower limit or flies away => start again (alive)
     if (this.y[0] > canvas.height + 50 || (this.y[0] < - 100 && this.yvel[0] < -0)) {
         this.y.push(-150);
         this.y.shift();
@@ -436,46 +422,35 @@ Bug.prototype.update = function () {
 Bug.prototype.print = function(genre) {
     // female
     if (genre == 0) {
-        bodyColor = '#6e547d';
-        armsColor = '#5b8c67';
-        aliveColor = '#04c8d6';
-        deadColor = '#438a86';
-        hairColor = '#66784a';
-        eyesColor = '#FFFFFF';
+        bodyColor = '#845';
+        armsColor = '#0ab';
+        aliveColor = '#0dd';
+        deadColor = '#498';
+        hairColor = '#446';
+        eyesColor = '#fff';
     // male
     } else {
-        bodyColor = '#317a66';
-        armsColor = '#3e9c70';
-        aliveColor = '#1ACC0A';
-        deadColor = '#0c7773';
-        hairColor = '#8ca644';
-        eyesColor = '#FFFFFF';
+        bodyColor = '#373';
+        armsColor = '#2a1';
+        aliveColor = '#1d0';
+        deadColor = '#177';
+        hairColor = '#364';
+        eyesColor = '#FFF';
     }
      // body
      ctx.fillStyle = bodyColor;
-    //  ctx.fillRect(this.x - 15, this.y + 20, 30, 20);
      ctx.fillRect(this.x[0] - 15, this.y[0] + 20, 30, 20);
 
      //legs
-    //  ctx.fillRect(this.x - 15, this.y + 40, 10, 20);
-    //  ctx.fillRect(this.x + 5, this.y + 40, 10, 20);
      ctx.fillRect(this.x[0] - 15, this.y[0] + 40, 10, 20);
      ctx.fillRect(this.x[0] + 5, this.y[0] + 40, 10, 20);
 
      // arms
      ctx.fillStyle = armsColor;
-    //  ctx.fillRect(this.x - 20, this.y + 20, 10, 20);
-    //  ctx.fillRect(this.x + 10, this.y + 20, 10, 20);
      ctx.fillRect(this.x[0] - 20, this.y[0] + 20, 10, 20);
      ctx.fillRect(this.x[0] + 10, this.y[0] + 20, 10, 20);
 
      // head
-    //  if (this.status == 'alive') {
-    //      ctx.fillStyle = aliveColor; // alive
-    //  } else if (this.status == 'dead') {
-    //      ctx.fillStyle = deadColor; // dead
-    //  }
-    //  ctx.fillRect(this.x -20, this.y - 20, 40, 40);
      if (this.status[0] == 'alive') {
          ctx.fillStyle = aliveColor; // alive
      } else if (this.status[0] == 'dead') {
@@ -486,9 +461,6 @@ Bug.prototype.print = function(genre) {
      // female hair
      if (genre == 0) {
         ctx.fillStyle = hairColor;
-        // ctx.fillRect(this.x - 20, this.y - 25, 40, 10);
-        // ctx.fillRect(this.x - 25, this.y - 15, 5, 40);
-        // ctx.fillRect(this.x + 20, this.y - 15, 5, 40);
         ctx.fillRect(this.x[0] - 20, this.y[0] - 25, 40, 10);
         ctx.fillRect(this.x[0] - 25, this.y[0] - 15, 5, 40);
         ctx.fillRect(this.x[0] + 20, this.y[0] - 15, 5, 40);
@@ -501,23 +473,19 @@ Bug.prototype.print = function(genre) {
     }
      // eyes
      ctx.fillStyle = eyesColor;
-    //  ctx.fillRect(this.x - 15, this.y - 10, 10, 10);
-    //  ctx.fillRect(this.x + 5, this.y - 10, 10, 10);
      ctx.fillRect(this.x[0] - 15, this.y[0] - 10, 10, 10);
      ctx.fillRect(this.x[0] + 5, this.y[0] - 10, 10, 10);
 
      // mouth
      ctx.fillStyle = '#000000';
-    //  ctx.fillRect(this.x - 4, this.y + 15, 8, 2);
      ctx.fillRect(this.x[0] - 4, this.y[0] + 15, 8, 2);
-
 }
 
 // loop
 function loop() {
     // buckground
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#dbe08d';
+    ctx.fillStyle = '#708090';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // people update
     for (let i = 0; i < num_ppl; i++) {
@@ -586,8 +554,8 @@ function loop() {
     document.getElementById("info-five").value = "Level";
     document.getElementById("info-six").value = "Points";
     // outputs
-    document.getElementById("output-one").value = "(o o)  -"  + dead_ppl_count;
-    document.getElementById("output-two").value = "(x x)  " + dead_bugs_count;
+    document.getElementById("output-one").value = dead_ppl_count;
+    document.getElementById("output-two").value = dead_bugs_count;
     document.getElementById("output-three").value = progress + dead_bugs_count - dead_ppl_count * 3;
     document.getElementById("output-four").value = time;
     document.getElementById("output-five").value = level;
