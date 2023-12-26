@@ -1,28 +1,27 @@
 
-var canvas, ctx;
-var bug = [];
-var ppl = [];
-var player = [];
-var num_bugs = 10;
-var num_ppl = 6;
-var dead_bugs_count = 0;
-var dead_ppl_count = 0;
-var progress = 50;
-var points = 0;
-var level = 10;
-var velRate = 1;
-var vel = level * velRate;
-var time = 61;
-var left, right, up, down, leftUp, leftDown, rightUp, rightDown;
-var horizontalMov = 0;
-var verticalMov = 0;
-var inverter= -1;
+let canvas, ctx;
+let bug = [];
+let ppl = [];
+let player = [];
+let num_bugs = 10;
+let num_ppl = 6;
+let dead_bugs_count = 0;
+let dead_ppl_count = 0;
+let progress = 50;
+let points = 0;
+let level = 10;
+let velRate = 1;
+let vel = level * velRate;
+let time = 61;
+let left, right, up, down, leftUp, leftDown, rightUp, rightDown;
+let horizontalMov = 0;
+let verticalMov = 0;
+let inverter= -1;
 // loop 10 ms
 
 // start
 function start() {
     load();
-
 }
 
 function load() {
@@ -56,13 +55,11 @@ function load() {
 }
 
 // timer
-function countDown() {
-  time--;
-  if (time > 0) {
-    setTimeout(countDown, 1000);
-  }
-}
-countDown();
+// function countDown() {
+//     console.log('loop')
+//     setTimeout(countDown, 1000);
+// }
+// countDown();
 
 // create player
 function Player() {
@@ -74,7 +71,7 @@ function Player() {
 Player.prototype.update = function () {
     //arrow keys down
     document.onkeydown = function (e) {
-                var key_code = e.which || e.keyCode;
+                let key_code = e.which || e.keyCode;
                 e.preventDefault();
                 switch (key_code) {
                     case 37: //left arrow key
@@ -93,7 +90,7 @@ Player.prototype.update = function () {
     }
     //arrow keys up
     document.onkeyup = function (e) {
-                var key_code = e.which || e.keyCode;
+                let key_code = e.which || e.keyCode;
                 switch (key_code) {
                     case 37: //left arrow key
                         horizontalMov = 0;
@@ -315,58 +312,123 @@ Person.prototype.print = function(genre) {
 
 // create bugs
 function Bug() {
-    this.x = (canvas.width / 4) + Math.random() * canvas.width / 2;
-    this.y = -500 - Math.random() * 500;;
+    // this.x = (canvas.width / 4) + Math.random() * canvas.width / 2;
+    // this.y = -500 - Math.random() * 500;
+    // sign = Math.sign(0.5 - Math.random()); // random sign
+    // this.xvel = (Math.random() + vel / 25) * sign; // 0.04-1.04 0.04-5
+    // this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
+    // this.status = "alive";
+    this.x = [(canvas.width / 4) + Math.random() * canvas.width / 2];
+    this.y = [-500 - Math.random() * 500];
     sign = Math.sign(0.5 - Math.random()); // random sign
-    this.xvel = (Math.random() + vel / 25) * sign; // 0.04-1.04 0.04-5
-    this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
-    this.status = "alive";
+    this.xvel = [(Math.random() + vel / 25) * sign]; // 0.04-1.04 0.04-5
+    this.yvel = [2 + Math.random() * 3 + Math.random() * (vel / 10)]; // 2-5.1 / 2-15
+    this.status = ["alive"];
 }
 
 // bugs position and state update
 Bug.prototype.update = function () {
+
     // side bounce
     // second conditions just in case they get between the 30px limit and beyond
-    if ((this.x > canvas.width - 30 && this.xvel > 0) || (this.x < 30 && this.xvel < 0)) {
-        this.xvel = -this.xvel;
+    // if ((this.x > canvas.width - 30 && this.xvel > 0) || (this.x < 30 && this.xvel < 0)) {
+    //     this.xvel = -this.xvel;
+    // }
+    if ((this.x[0] > canvas.width - 30 && this.xvel[0] > 0) || (this.x[0] < 30 && this.xvel[0] < 0)) {
+        this.xvel.push(this.xvel[0] * -1);
+        this.xvel.shift();
     }
+
     // keep moving
-    this.x += this.xvel;
-    this.y += this.yvel;
+    // this.x += this.xvel;
+    // this.y += this.yvel;
+    this.x.push(this.x[0] + this.xvel[0]);
+    this.x.shift();
+    this.y.push(this.y[0] + this.yvel[0]);
+    this.y.shift();
+
     // bug death
-    if ((this.x - player[0].x < 60 && this.x - player[0].x > -60) && (this.y - player[0].y < 190 && this.y - player[0].y > -40)) {
+    // if ((this.x - player[0].x < 60 && this.x - player[0].x > -60) && (this.y - player[0].y < 190 && this.y - player[0].y > -40)) {
+    if ((this.x[0] - player[0].x < 60 && this.x[0] - player[0].x > -60) && (this.y[0] - player[0].y < 190 && this.y[0] - player[0].y > -40)) {
+
         // crash color
         ctx.fillStyle = '#52eb0c';
-        ctx.fillRect(this.x - 30, this.y - 30, 60, 95);
-        // count + 1
-        if (this.status == 'alive') {
+        // ctx.fillRect(this.x - 30, this.y - 30, 60, 95);
+        ctx.fillRect(this.x[0] - 30, this.y[0] - 30, 60, 95);
+
+        // add 1 bug dead
+        // if (this.status == 'alive') {
+        //     dead_bugs_count++;
+        //     points++;
+        // }
+        if (this.status[0] == 'alive') {
             dead_bugs_count++;
             points++;
         }
+
         // update status
-        this.status = "dead";
-        this.xvel = 0;
-        if (this.y < player[0].y + 30) {
-        this.yvel = - 20 - vel / 10;
+        // this.status = "dead";
+        // this.xvel = 0;
+        // if (this.y < player[0].y + 30) {
+        // this.yvel = - 20 - vel / 10;
+        // } else {
+        //     this.yvel = 20 + vel / 10;
+        // }
+        // if (this.x < player[0].x - 40) {
+        //     this.yvel /= 2;
+        //     this.xvel = - 10 - vel / 20;
+        // }
+        // if (this.x > player[0].x + 40) {
+        //     this.yvel /= 2;
+        //     this.xvel = 10 + vel / 20;
+        // }
+        this.status.push("dead");
+        this.status.shift();
+
+        this.xvel.push(0);
+        this.xvel.sift();
+
+        if (this.y[0] < player[0].y + 30) {
+        this.yvel.push(- 20 - vel / 10);
+        this.yvel.shift();
         } else {
-            this.yvel = 20 + vel / 10;
+            this.yvel.push(20 + vel / 10);
+            this.yvel.shift();
         }
-        if (this.x < player[0].x - 40) {
-            this.yvel /= 2;
-            this.xvel = - 10 - vel / 20;
+        if (this.x[0] < player[0].x - 40) {
+            this.yvel.push(this.yvel[0] / 2);
+            this.yvel.shift();
+            this.xvel.push(- 10 - vel / 20);
+            this.xvel.shift();
         }
-        if (this.x > player[0].x + 40) {
-            this.yvel /= 2;
-            this.xvel = 10 + vel / 20;
+        if (this.x[0] > player[0].x + 40) {
+            this.yvel.push(this.yvel[0] / 2);
+            this.yvel.shift();
+            this.xvel.push(10 + vel / 20);
+            this.xvel.shift();
         }
     }
+
     // reaches lower limit or flies away => start again (alive)
-    if (this.y > canvas.height + 50 || (this.y < - 100 && this.yvel < -0)) {
-        this.y = -150;
+    // if (this.y > canvas.height + 50 || (this.y < - 100 && this.yvel < -0)) {
+    //     this.y = -150;
+    //     sign = Math.sign(0.5 - Math.random()); // random sign
+    //     this.xvel = (Math.random() + vel / 25) * sign; // 0.04-1.04 0.04-5
+    //     this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
+    //     this.status = "alive";
+    if (this.y[0] > canvas.height + 50 || (this.y[0] < - 100 && this.yvel[0] < -0)) {
+        this.y.push(-150);
+        this.y.shift();
+
         sign = Math.sign(0.5 - Math.random()); // random sign
-        this.xvel = (Math.random() + vel / 25) * sign; // 0.04-1.04 0.04-5
-        this.yvel = 2 + Math.random() * 3 + Math.random() * (vel / 10); // 2-5.1 / 2-15
-        this.status = "alive";
+
+        this.xvel.push((Math.random() + vel / 25) * sign); // 0.04-1.04 0.04-5
+        this.xvel.shift();
+        this.yvel.push(2 + Math.random() * 3 + Math.random() * (vel / 10)); // 2-5.1 / 2-15
+        this.yvel.shift();
+
+        this.status.push("alive");
+        this.status.shift();
     }
 }
 
@@ -391,39 +453,63 @@ Bug.prototype.print = function(genre) {
     }
      // body
      ctx.fillStyle = bodyColor;
-     ctx.fillRect(this.x - 15, this.y + 20, 30, 20);
+    //  ctx.fillRect(this.x - 15, this.y + 20, 30, 20);
+     ctx.fillRect(this.x[0] - 15, this.y[0] + 20, 30, 20);
+
      //legs
-     ctx.fillRect(this.x - 15, this.y + 40, 10, 20);
-     ctx.fillRect(this.x + 5, this.y + 40, 10, 20);
+    //  ctx.fillRect(this.x - 15, this.y + 40, 10, 20);
+    //  ctx.fillRect(this.x + 5, this.y + 40, 10, 20);
+     ctx.fillRect(this.x[0] - 15, this.y[0] + 40, 10, 20);
+     ctx.fillRect(this.x[0] + 5, this.y[0] + 40, 10, 20);
+
      // arms
      ctx.fillStyle = armsColor;
-     ctx.fillRect(this.x - 20, this.y + 20, 10, 20);
-     ctx.fillRect(this.x + 10, this.y + 20, 10, 20);
+    //  ctx.fillRect(this.x - 20, this.y + 20, 10, 20);
+    //  ctx.fillRect(this.x + 10, this.y + 20, 10, 20);
+     ctx.fillRect(this.x[0] - 20, this.y[0] + 20, 10, 20);
+     ctx.fillRect(this.x[0] + 10, this.y[0] + 20, 10, 20);
+
      // head
-     if (this.status == 'alive') {
+    //  if (this.status == 'alive') {
+    //      ctx.fillStyle = aliveColor; // alive
+    //  } else if (this.status == 'dead') {
+    //      ctx.fillStyle = deadColor; // dead
+    //  }
+    //  ctx.fillRect(this.x -20, this.y - 20, 40, 40);
+     if (this.status[0] == 'alive') {
          ctx.fillStyle = aliveColor; // alive
-     } else if (this.status == 'dead') {
+     } else if (this.status[0] == 'dead') {
          ctx.fillStyle = deadColor; // dead
      }
-     ctx.fillRect(this.x -20, this.y - 20, 40, 40);
+     ctx.fillRect(this.x[0] -20, this.y[0] - 20, 40, 40);
+
      // female hair
      if (genre == 0) {
         ctx.fillStyle = hairColor;
-        ctx.fillRect(this.x - 20, this.y - 25, 40, 10);
-        ctx.fillRect(this.x - 25, this.y - 15, 5, 40);
-        ctx.fillRect(this.x + 20, this.y - 15, 5, 40);
+        // ctx.fillRect(this.x - 20, this.y - 25, 40, 10);
+        // ctx.fillRect(this.x - 25, this.y - 15, 5, 40);
+        // ctx.fillRect(this.x + 20, this.y - 15, 5, 40);
+        ctx.fillRect(this.x[0] - 20, this.y[0] - 25, 40, 10);
+        ctx.fillRect(this.x[0] - 25, this.y[0] - 15, 5, 40);
+        ctx.fillRect(this.x[0] + 20, this.y[0] - 15, 5, 40);
+
     // male hair
     } else {
         ctx.fillStyle = hairColor;
-        ctx.fillRect(this.x - 20, this.y - 20, 40, 5);
+        // ctx.fillRect(this.x - 20, this.y - 20, 40, 5);
+        ctx.fillRect(this.x[0] - 20, this.y[0] - 20, 40, 5);
     }
      // eyes
      ctx.fillStyle = eyesColor;
-     ctx.fillRect(this.x - 15, this.y - 10, 10, 10);
-     ctx.fillRect(this.x + 5, this.y - 10, 10, 10);
+    //  ctx.fillRect(this.x - 15, this.y - 10, 10, 10);
+    //  ctx.fillRect(this.x + 5, this.y - 10, 10, 10);
+     ctx.fillRect(this.x[0] - 15, this.y[0] - 10, 10, 10);
+     ctx.fillRect(this.x[0] + 5, this.y[0] - 10, 10, 10);
+
      // mouth
      ctx.fillStyle = '#000000';
-     ctx.fillRect(this.x - 4, this.y + 15, 8, 2);
+    //  ctx.fillRect(this.x - 4, this.y + 15, 8, 2);
+     ctx.fillRect(this.x[0] - 4, this.y[0] + 15, 8, 2);
 
 }
 
@@ -434,7 +520,7 @@ function loop() {
     ctx.fillStyle = '#dbe08d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // people update
-    for (var i = 0; i < num_ppl; i++) {
+    for (let i = 0; i < num_ppl; i++) {
         ppl[i].update();
         if (i % 2 == 0) {
             ppl[i].print(1);
@@ -443,7 +529,7 @@ function loop() {
         }
     }
     // bugs update
-    for (var i = 0; i < num_bugs; i++) {
+    for (let i = 0; i < num_bugs; i++) {
         bug[i].update();
         if (i % 2 == 0) {
             bug[i].print(1);
